@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Collection, Events } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Events, REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
@@ -51,11 +51,59 @@ if (fs.existsSync(modulesPath)) {
     }
 }
 
+// Função para deploy automático dos comandos
+async function deployCommands() {
+    try {
+        console.log('🔄 Iniciando deploy automático dos comandos...');
+        
+        const commands = [];
+        const commandsPath = path.join(__dirname, 'commands');
+        
+        if (fs.existsSync(commandsPath)) {
+            const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+            
+            for (const file of commandFiles) {
+                const filePath = path.join(commandsPath, file);
+                const command = require(filePath);
+                
+                if ('data' in command && 'execute' in command) {
+                    commands.push(command.data.toJSON());
+                }
+            }
+        }
+        
+        const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+        
+        // Deploy global
+        await rest.put(
+            Routes.applicationCommands(process.env.CLIENT_ID),
+            { body: commands }
+        );
+        
+        console.log(`✅ Deploy automático concluído! ${commands.length} comandos registrados.`);
+        
+        // Deploy no servidor específico (mais rápido)
+        if (process.env.GUILD_ID) {
+            await rest.put(
+                Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+                { body: commands }
+            );
+            console.log(`✅ Comandos registrados no servidor específico!`);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro no deploy automático:', error);
+    }
+}
+
 // Evento: Bot pronto
-client.once(Events.ClientReady, readyClient => {
+client.once(Events.ClientReady, async readyClient => {
     console.log(`🚀 Bot ${readyClient.user.tag} está online!`);
     console.log(`📊 Servidores: ${client.guilds.cache.size}`);
     console.log(`👥 Usuários: ${client.users.cache.size}`);
+    
+    // Fazer deploy dos comandos
+    await deployCommands();
     
     // Definir status do bot
     client.user.setActivity('gerando imagens incríveis!', { type: 'PLAYING' });

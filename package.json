@@ -7,7 +7,8 @@
     "start": "node src/bot.js",
     "dev": "nodemon src/bot.js",
     "deploy": "node src/deploy-commands.js",
-    "render-start": "npm run deploy && npm start"
+    "render-start": "npm run deploy && npm start",
+    "render-simple": "node src/bot.js"
   },
   "keywords": [
     "discord",
