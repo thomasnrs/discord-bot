@@ -1,190 +1,426 @@
-# 🤖 Bot Discord Modular
+# 🤖 Bot Discord Modular Completo
 
-Bot Discord completo e modular com geração de imagens usando IA da Cloudflare Workers.
+Bot Discord profissional e modular com **TODAS** as funcionalidades modernas: geração de imagens IA, sistema de economia, música, tickets, níveis, moderação, dashboard web e muito mais!
 
-## ✨ Funcionalidades
+## ✨ Funcionalidades Principais
 
-- 🎨 **Geração de Imagens**: Cria imagens usando IA com diferentes modelos
-- ⚙️ **Administração**: Comandos de admin para gerenciar o bot
-- 🔒 **Rate Limiting**: Controle de requisições por usuário
-- 📊 **Estatísticas**: Monitoramento em tempo real
-- 🏗️ **Modular**: Fácil de expandir com novos módulos
+### 🎨 **Geração de Imagens IA**
+- Geração de imagens usando Cloudflare Workers
+- Múltiplos modelos de IA (Stable Diffusion XL, DreamShaper, etc)
+- Rate limiting inteligente
+- Qualidade configurável (steps)
 
-## 🚀 Instalação
+### 💰 **Sistema de Economia Completo**
+- Sistema de moedas com carteira e banco
+- Comandos: `/daily`, `/work`, `/crime`, `/transfer`
+- Sistema de cooldowns e recompensas
+- Leaderboard de usuários mais ricos
+- Banco de dados JSON persistente
 
-1. **Clone o repositório**
-```bash
-git clone <seu-repositorio>
-cd discord-bot-modular
-```
+### 🎵 **Player de Música Avançado**
+- Reprodução de músicas do YouTube
+- Comandos: `/play`, `/pause`, `/resume`, `/skip`, `/stop`, `/queue`
+- Sistema de filas inteligente
+- Controle de volume e progresso
+- Eventos automáticos de música
 
-2. **Instale as dependências**
-```bash
+### 🎫 **Sistema de Tickets Profissional**
+- Criação automática de tickets por categoria
+- Categorias: Bug, Sugestão, Dúvida, Denúncia, Suporte, etc
+- Sistema de permissões automático
+- Comandos: `/ticket`, `/close`, `/adduser`, `/removeuser`
+- Fechamento automático com limpeza
+
+### 📈 **Sistema de Níveis e XP**
+- XP por mensagens, comandos e tempo de voz
+- Comandos: `/level`, `/levelboard`
+- Sistema de progressão com barras visuais
+- Notificações de level up automáticas
+- Leaderboard de níveis
+
+### 🔧 **Moderação Avançada**
+- Comandos: `/ban`, `/kick` com logs automáticos
+- Verificação de hierarquia de cargos
+- Sistema de logs detalhado
+- Embeds informativos
+
+### 🎮 **Comandos de Diversão**
+- `/8ball` - Bola 8 mágica
+- `/dice` - Rolar dados personalizáveis
+- `/joke` - Piadas aleatórias
+- `/coinflip` - Cara ou coroa com apostas
+
+### 📊 **Sistema de Estatísticas**
+- Monitoramento em tempo real do sistema
+- Atualização automática a cada 30 segundos
+- Métricas: CPU, memória, uptime, ping, comandos
+- Edição de mensagem (não flooda o canal)
+
+### 🌐 **Dashboard Web**
+- Interface web completa e responsiva
+- Estatísticas em tempo real do bot
+- API REST para dados
+- Design moderno e profissional
+
+## 🚀 Instalação Rápida
+
+### 1. **Clone e Instale**
+   ```bash
+git clone https://github.com/thomasnrs/discord-bot.git
+cd discord-bot
 npm install
 ```
 
-3. **Configure as variáveis de ambiente**
+### 2. **Configure as Variáveis de Ambiente**
 ```bash
-# Copie o arquivo de exemplo
+# Copie o arquivo de configuração
 cp config.env .env
 
-# Edite o .env com suas configurações
+# Edite com suas configurações
 ```
 
-4. **Configure o .env**
+### 3. **Configure o .env**
 ```env
 # Discord Bot Configuration
 DISCORD_TOKEN=seu_token_do_bot_aqui
 CLIENT_ID=seu_client_id_aqui
-GUILD_ID=id_do_servidor_para_testes_opcional
+GUILD_ID=id_do_servidor_para_testes
 
 # API Configuration
 WORKER_URL=https://seu-worker.cloudflare.workers.dev
 
 # Bot Configuration
-BOT_PREFIX=!
 OWNER_ID=seu_user_id_aqui
+LOG_CHANNEL_ID=id_do_canal_de_logs
+STATS_CHANNEL_ID=id_do_canal_de_stats
+
+# Economy System
+ECONOMY_ENABLED=true
+DAILY_AMOUNT=500
+WEEKLY_AMOUNT=2000
+
+# Level System
+LEVEL_SYSTEM_ENABLED=true
+XP_PER_MESSAGE=15
+XP_PER_COMMAND=25
+
+# Music System
+MUSIC_ENABLED=true
+DEFAULT_VOLUME=50
+
+# Ticket System
+TICKET_SYSTEM_ENABLED=true
+
+# Web Dashboard
+WEB_DASHBOARD_ENABLED=true
+WEB_PORT=3000
 ```
 
-## 🎯 Comandos
+### 4. **Execute o Bot**
+```bash
+# Deploy dos comandos (primeira vez)
+npm run deploy
 
-### 🎨 Geração de Imagens
-- `/gerar` - Gera imagens usando IA
-  - `prompt` (obrigatório): Descrição da imagem
-  - `modelo` (opcional): Modelo de IA a usar
-  - `steps` (opcional): Qualidade (1-50)
+# Iniciar o bot
+npm start
 
-### ⚙️ Administração
-- `/admin stats` - Estatísticas do bot
-- `/admin ping` - Testa latência
-- `/admin rate-limit` - Info sobre rate limiting
-- `/admin servers` - Lista servidores
+# Modo desenvolvimento
+npm run dev
+```
 
-### ❓ Ajuda
-- `/help` - Mostra todos os comandos
+## 🎯 Comandos Disponíveis
 
-## 🤖 Modelos de IA
+### 🎨 **Geração de Imagens**
+| Comando | Descrição | Parâmetros |
+|---------|-----------|------------|
+| `/gerar` | Gera imagem usando IA | `prompt` (obrigatório) |
 
-1. **DreamShaper 8 LCM** - Rápido e eficiente (até 20 steps)
-2. **Stable Diffusion XL** - Alta qualidade (até 50 steps)
-3. **SDXL Lightning** - Super rápido (até 20 steps)
+### 💰 **Sistema de Economia**
+| Comando | Descrição | Cooldown |
+|---------|-----------|----------|
+| `/balance` | Mostra saldo atual | - |
+| `/daily` | Recebe moedas diárias | 24h |
+| `/work` | Trabalha para ganhar moedas | 30min |
+| `/crime` | Comete crime (pode ganhar/perder) | 1h |
+| `/transfer` | Transfere entre carteira/banco | - |
+| `/leaderboard` | Ranking dos mais ricos | - |
+
+### 🎵 **Sistema de Música**
+| Comando | Descrição |
+|---------|-----------|
+| `/play` | Toca uma música |
+| `/pause` | Pausa a música atual |
+| `/resume` | Retoma música pausada |
+| `/skip` | Pula para próxima música |
+| `/stop` | Para música e limpa fila |
+| `/queue` | Mostra fila de músicas |
+| `/nowplaying` | Música atual |
+| `/volume` | Altera volume (0-100) |
+
+### 🎫 **Sistema de Tickets**
+| Comando | Descrição | Permissão |
+|---------|-----------|-----------|
+| `/ticket` | Cria ticket de suporte | Todos |
+| `/close` | Fecha ticket atual | Staff |
+| `/adduser` | Adiciona usuário ao ticket | Staff |
+| `/removeuser` | Remove usuário do ticket | Staff |
+
+### 📈 **Sistema de Níveis**
+| Comando | Descrição |
+|---------|-----------|
+| `/level` | Mostra perfil de nível |
+| `/levelboard` | Ranking de níveis |
+
+### 🔧 **Moderação**
+| Comando | Descrição | Permissão |
+|---------|-----------|-----------|
+| `/ban` | Bane usuário do servidor | Ban Members |
+| `/kick` | Expulsa usuário | Kick Members |
+
+### 🎮 **Diversão**
+| Comando | Descrição |
+|---------|-----------|
+| `/8ball` | Bola 8 mágica |
+| `/dice` | Rola dados personalizáveis |
+| `/joke` | Conta uma piada |
+| `/coinflip` | Cara ou coroa |
+
+### 📊 **Administração**
+| Comando | Descrição | Permissão |
+|---------|-----------|-----------|
+| `/stats` | Estatísticas do bot | Manage Guild |
+| `/status` | Status atual do bot | - |
+| `/statscontrol` | Controla stats automático | Administrator |
 
 ## 🏗️ Estrutura do Projeto
 
 ```
 src/
-├── bot.js                 # Arquivo principal do bot
-├── deploy-commands.js     # Deploy dos comandos slash
-├── commands/              # Comandos slash
-│   ├── gerar.js          # Comando de geração de imagem
-│   ├── admin.js          # Comandos de administração
-│   └── help.js           # Comando de ajuda
-└── modules/              # Módulos do bot
-    └── imageGenerator.js # Módulo de geração de imagem
+├── bot.js                    # Arquivo principal do bot
+├── commands/                 # Comandos slash organizados
+│   ├── economy/             # Sistema de economia
+│   │   ├── balance.js
+│   │   ├── daily.js
+│   │   ├── work.js
+│   │   ├── crime.js
+│   │   ├── transfer.js
+│   │   └── leaderboard.js
+│   ├── music/               # Sistema de música
+│   │   ├── play.js
+│   │   ├── pause.js
+│   │   ├── resume.js
+│   │   ├── skip.js
+│   │   ├── stop.js
+│   │   ├── queue.js
+│   │   ├── nowplaying.js
+│   │   └── volume.js
+│   ├── ticket/              # Sistema de tickets
+│   │   ├── create.js
+│   │   ├── close.js
+│   │   ├── adduser.js
+│   │   └── removeuser.js
+│   ├── level/               # Sistema de níveis
+│   │   ├── profile.js
+│   │   └── leaderboard.js
+│   ├── moderation/          # Moderação
+│   │   ├── ban.js
+│   │   └── kick.js
+│   ├── fun/                 # Comandos de diversão
+│   │   ├── 8ball.js
+│   │   ├── dice.js
+│   │   ├── joke.js
+│   │   └── coinflip.js
+│   ├── gerar.js             # Geração de imagens
+│   ├── help.js              # Ajuda
+│   ├── stats.js             # Estatísticas
+│   ├── status.js            # Status
+│   └── statscontrol.js      # Controle de stats
+├── modules/                 # Módulos do sistema
+│   ├── database.js          # Banco de dados JSON
+│   ├── economy.js           # Sistema de economia
+│   ├── music.js             # Player de música
+│   ├── ticketSystem.js      # Sistema de tickets
+│   ├── levelSystem.js       # Sistema de níveis
+│   ├── imageGenerator.js    # Geração de imagens
+│   └── systemStats.js       # Estatísticas do sistema
+├── web/                     # Dashboard web
+│   └── dashboard.js         # Interface web
+└── data/                    # Dados persistentes
+    ├── economy.json         # Dados de economia
+    ├── levels.json          # Dados de níveis
+    ├── tickets.json         # Dados de tickets
+    └── guildConfigs.json    # Configurações de servidor
 ```
 
-## 🚀 Como Executar
+## 🌐 Dashboard Web
 
-1. **Deploy dos comandos** (primeira vez)
-```bash
-npm run deploy
-```
+Acesse o dashboard web em: `http://localhost:3000` (ou sua URL do Render)
 
-2. **Iniciar o bot**
-```bash
-npm start
-```
-
-3. **Modo desenvolvimento** (com auto-reload)
-```bash
-npm run dev
-```
+### Funcionalidades do Dashboard:
+- **Estatísticas em tempo real** do bot
+- **Informações de servidores** e usuários
+- **Lista de comandos** disponíveis
+- **Métricas de sistema** (CPU, memória, uptime)
+- **Design responsivo** e moderno
 
 ## 🔧 Configuração do Discord
 
+### 1. **Criar Aplicação**
 1. Acesse [Discord Developer Portal](https://discord.com/developers/applications)
-2. Crie uma nova aplicação
-3. Vá em "Bot" e crie um bot
-4. Copie o token e coloque no `.env`
-5. Vá em "OAuth2" > "URL Generator"
-6. Selecione "bot" e "applications.commands"
-7. Copie a URL e adicione o bot ao seu servidor
+2. Clique em "New Application"
+3. Dê um nome para seu bot
 
-## 📝 Adicionando Novos Comandos
+### 2. **Configurar Bot**
+1. Vá em "Bot" no menu lateral
+2. Clique em "Add Bot"
+3. Copie o **Token** e coloque no `.env`
+4. Ative as **Privileged Gateway Intents**:
+   - ✅ MESSAGE CONTENT INTENT
+   - ✅ SERVER MEMBERS INTENT
 
-1. Crie um arquivo em `src/commands/nome-do-comando.js`
-2. Use a estrutura:
+### 3. **Configurar OAuth2**
+1. Vá em "OAuth2" > "URL Generator"
+2. Selecione:
+   - ✅ `bot`
+   - ✅ `applications.commands`
+3. Selecione as permissões necessárias:
+   - ✅ Send Messages
+   - ✅ Use Slash Commands
+   - ✅ Manage Messages
+   - ✅ Ban Members
+   - ✅ Kick Members
+   - ✅ Manage Channels
+   - ✅ Connect (para música)
+   - ✅ Speak (para música)
+4. Copie a URL e adicione o bot ao servidor
 
-```javascript
-const { SlashCommandBuilder } = require('discord.js');
+## 🚀 Deploy no Render
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('nome-do-comando')
-        .setDescription('Descrição do comando'),
-    
-    async execute(interaction) {
-        // Lógica do comando
-    },
-};
-```
+### 1. **Configurar Render**
+1. Acesse [Render Dashboard](https://dashboard.render.com)
+2. Conecte seu repositório GitHub
+3. Crie um novo **Web Service**
+4. Configure:
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+   - **Plan**: Free
 
-3. Execute `npm run deploy` para registrar o comando
+### 2. **Configurar Variáveis de Ambiente**
+No painel do Render, adicione todas as variáveis do `.env`:
+- `DISCORD_TOKEN`
+- `CLIENT_ID`
+- `GUILD_ID`
+- `WORKER_URL`
+- `OWNER_ID`
+- `LOG_CHANNEL_ID`
+- `STATS_CHANNEL_ID`
+- E todas as outras...
 
-## 🔧 Adicionando Novos Módulos
+### 3. **Deploy Automático**
+- O Render fará deploy automático a cada push
+- Monitore os logs para verificar se está funcionando
+- Acesse o dashboard web na URL do Render
 
-1. Crie um arquivo em `src/modules/nome-do-modulo.js`
-2. Use a estrutura:
+## 📊 Monitoramento e Logs
 
-```javascript
-module.exports = {
-    init: (client) => {
-        // Inicialização do módulo
-        client.meuModulo = new MeuModulo();
-    }
-};
-```
+### **Sistema de Stats Automático**
+- Atualização a cada 30 segundos
+- Canal configurável para stats
+- Métricas: CPU, memória, uptime, ping, comandos
+- Edição de mensagem (não flooda)
 
-## 🛡️ Rate Limiting
+### **Logs Detalhados**
+- Logs de comandos executados
+- Logs de moderação
+- Logs de sistema
+- Logs de música e tickets
 
-- **Limite**: 5 requisições por usuário por minuto
-- **Configurável**: Via variáveis de ambiente
-- **Controle**: Automático por usuário
+## 🛡️ Segurança e Rate Limiting
 
-## 📊 Monitoramento
+### **Rate Limiting**
+- **Imagens**: 5 requisições por usuário por minuto
+- **Economia**: Cooldowns configuráveis
+- **Música**: Controle de fila (máx 50 músicas)
+- **Tickets**: Limite de tickets por usuário
 
-- Estatísticas em tempo real
-- Logs detalhados
-- Monitoramento de memória
-- Controle de uptime
+### **Permissões**
+- Verificação de hierarquia de cargos
+- Comandos restritos por permissão
+- Sistema de logs de moderação
+- Controle de acesso por categoria
+
+## 🔮 Funcionalidades Avançadas
+
+### **Sistema Modular**
+- Fácil adição de novos comandos
+- Módulos independentes
+- Sistema de eventos
+- Configuração flexível
+
+### **Banco de Dados**
+- Persistência com JSON
+- Backup automático
+- Dados organizados por categoria
+- Fácil migração
+
+### **API REST**
+- Endpoints para estatísticas
+- Dados de servidores e usuários
+- Integração com dashboard web
+- Documentação automática
 
 ## 🤝 Contribuindo
 
-1. Fork o projeto
-2. Crie uma branch para sua feature
-3. Commit suas mudanças
-4. Push para a branch
-5. Abra um Pull Request
+1. **Fork** o projeto
+2. **Crie** uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. **Commit** suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** para a branch (`git push origin feature/AmazingFeature`)
+5. **Abra** um Pull Request
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## 🆘 Suporte
+## 🆘 Suporte e Troubleshooting
 
-Se encontrar problemas:
+### **Problemas Comuns**
 
-1. Verifique se todas as variáveis do `.env` estão corretas
-2. Confirme se o bot tem as permissões necessárias
-3. Verifique os logs do console
-4. Teste se o worker está funcionando
+1. **Bot não responde**
+   - Verifique se o token está correto
+   - Confirme as permissões do bot
+   - Verifique os logs do Render
 
-## 🔮 Próximas Features
+2. **Comandos não aparecem**
+   - Execute `npm run deploy`
+   - Aguarde até 1 hora para propagação global
+   - Verifique se o CLIENT_ID está correto
 
-- [ ] Sistema de economia
-- [ ] Comandos de música
-- [ ] Sistema de tickets
-- [ ] Moderação avançada
-- [ ] Dashboard web
-- [ ] Sistema de níveis
-- [ ] Comandos de diversão
+3. **Música não toca**
+   - Verifique se o bot está no canal de voz
+   - Confirme as permissões de voz
+   - Teste com URLs do YouTube
+
+4. **Economia não funciona**
+   - Verifique se `ECONOMY_ENABLED=true`
+   - Confirme as permissões de escrita
+   - Verifique os logs de erro
+
+### **Logs e Debug**
+- Monitore os logs do Render
+- Use `/stats` para verificar status
+- Verifique o dashboard web
+- Confirme as variáveis de ambiente
+
+## 🎉 Agradecimentos
+
+- **Discord.js** - Framework principal
+- **Cloudflare Workers** - API de geração de imagens
+- **Render** - Hospedagem gratuita
+- **Discord Player** - Sistema de música
+- **Express** - Dashboard web
+
+---
+
+**Desenvolvido com ❤️ para a comunidade Discord!**
+
+*Bot Discord Modular - Versão 2.0 - Todas as features implementadas!* 🚀
