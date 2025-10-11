@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: discord-bot
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DISCORD_TOKEN
+        fromService:
+          type: secret
+          name: discord-token
+      - key: CLIENT_ID
+        fromService:
+          type: secret
+          name: client-id
+      - key: WORKER_URL
+        fromService:
+          type: secret
+          name: worker-url
+      - key: OWNER_ID
+        fromService:
+          type: secret
+          name: owner-id
+      - key: GUILD_ID
+        fromService:
+          type: secret
+          name: guild-id
+      - key: LOG_CHANNEL_ID
+        fromService:
+          type: secret
+          name: log-channel-id
+      - key: MAX_REQUESTS_PER_USER
+        value: "5"
+      - key: RATE_LIMIT_WINDOW
+        value: "60000"
+      - key: DEFAULT_MODEL
+        value: "@cf/lykon/dreamshaper-8-lcm"
+      - key: DEFAULT_STEPS
+        value: "20"
+      - key: MAX_STEPS
+        value: "50"

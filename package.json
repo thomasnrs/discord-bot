@@ -1,0 +1,34 @@
+{
+  "name": "discord-bot-modular",
+  "version": "1.0.0",
+  "description": "Bot Discord modular com geração de imagens e administração",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "dev": "nodemon src/bot.js",
+    "deploy": "node src/deploy-commands.js",
+    "render-start": "npm run deploy && npm start"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "image-generation",
+    "ai",
+    "modular"
+  ],
+  "author": "Seu Nome",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.2",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.9.0"
+  }
+}
