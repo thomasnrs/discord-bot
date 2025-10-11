@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits, Collection, Events, REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const SystemStats = require('./modules/systemStats');
 require('dotenv').config();
 
 // Criar cliente Discord
@@ -16,6 +17,9 @@ const client = new Client({
 
 // Coleção para comandos
 client.commands = new Collection();
+
+// Inicializar sistema de stats
+client.systemStats = new SystemStats();
 
 // Carregar comandos
 const commandsPath = path.join(__dirname, 'commands');
@@ -115,6 +119,60 @@ async function deployCommands() {
     }
 }
 
+// Função para iniciar o sistema de stats automático
+function startAutoStats() {
+    const STATS_CHANNEL_ID = '1426577469284024420'; // ID do canal para stats
+    const UPDATE_INTERVAL = 30000; // 30 segundos
+    
+    console.log('📊 Iniciando sistema de stats automático...');
+    console.log(`📺 Canal de stats: ${STATS_CHANNEL_ID}`);
+    console.log(`⏰ Intervalo de atualização: ${UPDATE_INTERVAL / 1000} segundos`);
+    
+    // Função para enviar stats
+    async function sendStats() {
+        try {
+            const channel = client.channels.cache.get(STATS_CHANNEL_ID);
+            
+            if (!channel) {
+                console.log('❌ Canal de stats não encontrado!');
+                return;
+            }
+            
+            // Calcular ping
+            const startTime = Date.now();
+            const ping = client.ws.ping;
+            
+            // Criar embed de stats
+            const statsEmbed = client.systemStats.createStatsEmbed(ping);
+            
+            // Enviar ou editar mensagem
+            if (client.lastStatsMessage) {
+                try {
+                    await client.lastStatsMessage.edit({ embeds: [statsEmbed] });
+                    console.log('📊 Stats atualizados no canal');
+                } catch (error) {
+                    console.log('⚠️ Erro ao editar mensagem de stats, enviando nova...');
+                    client.lastStatsMessage = await channel.send({ embeds: [statsEmbed] });
+                }
+            } else {
+                client.lastStatsMessage = await channel.send({ embeds: [statsEmbed] });
+                console.log('📊 Primeira mensagem de stats enviada');
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao enviar stats automático:', error);
+        }
+    }
+    
+    // Enviar stats imediatamente
+    setTimeout(sendStats, 5000); // Aguardar 5 segundos após o bot ficar online
+    
+    // Configurar intervalo para envio automático
+    client.statsInterval = setInterval(sendStats, UPDATE_INTERVAL);
+    
+    console.log('✅ Sistema de stats automático iniciado!');
+}
+
 // Evento: Bot pronto
 client.once(Events.ClientReady, async readyClient => {
     console.log(`🚀 Bot ${readyClient.user.tag} está online!`);
@@ -126,6 +184,9 @@ client.once(Events.ClientReady, async readyClient => {
     
     // Definir status do bot
     client.user.setActivity('gerando imagens incríveis!', { type: 'PLAYING' });
+    
+    // Iniciar sistema de stats automático
+    startAutoStats();
 });
 
 // Evento: Interação de comando
@@ -140,6 +201,9 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     try {
+        // Incrementar contador de comandos
+        client.systemStats.incrementCommandCount();
+        
         await command.execute(interaction);
         console.log(`✅ Comando ${interaction.commandName} executado por ${interaction.user.tag}`);
     } catch (error) {
@@ -155,6 +219,14 @@ client.on(Events.InteractionCreate, async interaction => {
         } else {
             await interaction.reply(errorMessage);
         }
+    }
+});
+
+// Evento: Mensagem recebida (para contador)
+client.on(Events.MessageCreate, message => {
+    // Incrementar contador de mensagens (apenas se não for do bot)
+    if (!message.author.bot) {
+        client.systemStats.incrementMessageCount();
     }
 });
 
