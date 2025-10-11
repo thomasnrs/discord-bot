@@ -2,6 +2,8 @@ const { Client, GatewayIntentBits, Collection, Events, REST, Routes } = require(
 const fs = require('fs');
 const path = require('path');
 const SystemStats = require('./modules/systemStats');
+const Database = require('./modules/database');
+const Economy = require('./modules/economy');
 require('dotenv').config();
 
 // Criar cliente Discord
@@ -18,26 +20,40 @@ const client = new Client({
 // Coleção para comandos
 client.commands = new Collection();
 
-// Inicializar sistema de stats
+// Inicializar sistemas
 client.systemStats = new SystemStats();
+client.database = new Database();
+client.economy = new Economy();
 
-// Carregar comandos
-const commandsPath = path.join(__dirname, 'commands');
-if (fs.existsSync(commandsPath)) {
-    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+// Carregar comandos (incluindo subpastas)
+function loadCommands(dir) {
+    const commandsPath = path.join(__dirname, 'commands', dir);
+    if (!fs.existsSync(commandsPath)) return;
     
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
-        const command = require(filePath);
+    const items = fs.readdirSync(commandsPath);
+    
+    for (const item of items) {
+        const itemPath = path.join(commandsPath, item);
+        const stat = fs.statSync(itemPath);
         
-        if ('data' in command && 'execute' in command) {
-            client.commands.set(command.data.name, command);
-            console.log(`✅ Comando carregado: ${command.data.name}`);
-        } else {
-            console.log(`⚠️  Comando em ${filePath} está faltando propriedades "data" ou "execute"`);
+        if (stat.isDirectory()) {
+            // Carregar comandos de subpastas
+            loadCommands(path.join(dir, item));
+        } else if (item.endsWith('.js')) {
+            const command = require(itemPath);
+            
+            if ('data' in command && 'execute' in command) {
+                client.commands.set(command.data.name, command);
+                console.log(`✅ Comando carregado: ${command.data.name}`);
+            } else {
+                console.log(`⚠️  Comando em ${itemPath} está faltando propriedades "data" ou "execute"`);
+            }
         }
     }
 }
+
+// Carregar comandos da pasta raiz e subpastas
+loadCommands('');
 
 // Carregar módulos
 const modulesPath = path.join(__dirname, 'modules');
@@ -65,25 +81,32 @@ async function deployCommands() {
         console.log('GUILD_ID:', process.env.GUILD_ID ? '✅ Configurado' : '❌ Não configurado');
         
         const commands = [];
-        const commandsPath = path.join(__dirname, 'commands');
-        console.log('📁 Caminho dos comandos:', commandsPath);
         
-        if (fs.existsSync(commandsPath)) {
-            const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-            console.log('📄 Arquivos de comando encontrados:', commandFiles);
+        // Função para carregar comandos de subpastas
+        function loadCommandsForDeploy(dir) {
+            const commandsPath = path.join(__dirname, 'commands', dir);
+            if (!fs.existsSync(commandsPath)) return;
             
-            for (const file of commandFiles) {
-                const filePath = path.join(commandsPath, file);
-                const command = require(filePath);
+            const items = fs.readdirSync(commandsPath);
+            
+            for (const item of items) {
+                const itemPath = path.join(commandsPath, item);
+                const stat = fs.statSync(itemPath);
                 
-                if ('data' in command && 'execute' in command) {
-                    commands.push(command.data.toJSON());
-                    console.log(`✅ Comando preparado: ${command.data.name}`);
+                if (stat.isDirectory()) {
+                    loadCommandsForDeploy(path.join(dir, item));
+                } else if (item.endsWith('.js')) {
+                    const command = require(itemPath);
+                    
+                    if ('data' in command && 'execute' in command) {
+                        commands.push(command.data.toJSON());
+                        console.log(`✅ Comando preparado: ${command.data.name}`);
+                    }
                 }
             }
-        } else {
-            console.log('❌ Pasta de comandos não encontrada!');
         }
+        
+        loadCommandsForDeploy('');
         
         console.log(`📊 Total de comandos preparados: ${commands.length}`);
         
