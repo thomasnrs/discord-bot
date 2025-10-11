@@ -42,8 +42,9 @@ module.exports = {
                 const imageBuffer = Buffer.from(base64Data, 'base64');
                 
                 const timestamp = Date.now();
+                const filename = `imagem-${timestamp}.png`;
                 const attachment = new AttachmentBuilder(imageBuffer, { 
-                    name: `imagem-${timestamp}.png` 
+                    name: filename 
                 });
 
                 // Criar embed de sucesso
@@ -56,7 +57,7 @@ module.exports = {
                         { name: '⚙️ Steps', value: result.steps.toString(), inline: true },
                         { name: '👤 Usuário', value: interaction.user.toString(), inline: true }
                     )
-                    .setImage(`attachment://imagem-${timestamp}.png`)
+                    .setImage(`attachment://${filename}`)
                     .setTimestamp()
                     .setFooter({ 
                         text: `Gerado por ${interaction.user.username}`, 

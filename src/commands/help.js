@@ -15,8 +15,7 @@ module.exports = {
                     name: '🎨 Geração de Imagens',
                     value: '`/gerar` - Gera imagens usando IA\n' +
                            '• **prompt** (obrigatório): Descreva a imagem\n' +
-                           '• **modelo** (opcional): Escolha o modelo de IA\n' +
-                           '• **steps** (opcional): Qualidade da imagem (1-50)',
+                           '• Usa Stable Diffusion XL por padrão (20 steps)',
                     inline: false
                 },
                 {
