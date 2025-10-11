@@ -296,6 +296,9 @@ client.on(Events.InteractionCreate, async interaction => {
     } else if (interaction.isButton()) {
         // Processar cliques em botões
         await handleButtonClick(interaction);
+    } else if (interaction.isStringSelectMenu()) {
+        // Processar seleções de menu
+        await handleSelectMenu(interaction);
     }
 });
 
@@ -349,7 +352,28 @@ async function handleButtonClick(interaction) {
             return;
         }
         
-        // Outros botões podem ser adicionados aqui
+        // Sistema de tickets
+        if (interaction.customId === 'open_ticket') {
+            await handleOpenTicket(interaction);
+            return;
+        }
+        
+        if (interaction.customId === 'ticket_pause') {
+            const result = await client.ticketSystem.pauseTicket(interaction);
+            await interaction.reply({ content: result.message, ephemeral: true });
+            return;
+        }
+        
+        if (interaction.customId === 'ticket_log') {
+            const result = await client.ticketSystem.showTicketLogs(interaction);
+            return;
+        }
+        
+        if (interaction.customId === 'ticket_close') {
+            const result = await client.ticketSystem.closeTicket(interaction);
+            await interaction.reply({ content: result.message, ephemeral: true });
+            return;
+        }
         
     } catch (error) {
         console.error('❌ Erro ao processar clique em botão:', error);
@@ -364,6 +388,123 @@ async function handleButtonClick(interaction) {
         } else {
             await interaction.reply(errorMessage);
         }
+    }
+}
+
+// Função para processar seleções de menu
+async function handleSelectMenu(interaction) {
+    try {
+        if (interaction.customId === 'ticket_category') {
+            await handleTicketCategory(interaction);
+            return;
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao processar seleção de menu:', error);
+        
+        const errorMessage = {
+            content: '❌ Ocorreu um erro ao processar sua seleção!',
+            ephemeral: true
+        };
+
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp(errorMessage);
+        } else {
+            await interaction.reply(errorMessage);
+        }
+    }
+}
+
+// Função para abrir ticket
+async function handleOpenTicket(interaction) {
+    const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
+    
+    const embed = new EmbedBuilder()
+        .setColor('#7289da')
+        .setTitle('🎫 Criar Ticket')
+        .setDescription('Escolha a categoria do seu ticket:')
+        .setTimestamp();
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('ticket_category')
+        .setPlaceholder('Escolha a categoria do seu ticket')
+        .addOptions([
+            new StringSelectMenuOptionBuilder()
+                .setLabel('🐛 Bug Report')
+                .setDescription('Reportar problemas técnicos')
+                .setValue('bug')
+                .setEmoji('🐛'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('💡 Sugestão')
+                .setDescription('Sugerir melhorias')
+                .setValue('suggestion')
+                .setEmoji('💡'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('❓ Dúvida')
+                .setDescription('Tirar dúvidas gerais')
+                .setValue('question')
+                .setEmoji('❓'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('🚨 Denúncia')
+                .setDescription('Reportar comportamentos inadequados')
+                .setValue('report')
+                .setEmoji('🚨'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('🔧 Suporte')
+                .setDescription('Suporte técnico')
+                .setValue('support')
+                .setEmoji('🔧'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('💰 Economia')
+                .setDescription('Problemas com sistema de economia')
+                .setValue('economy')
+                .setEmoji('💰'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('🎵 Música')
+                .setDescription('Problemas com sistema de música')
+                .setValue('music')
+                .setEmoji('🎵'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('🎫 Outros')
+                .setDescription('Outras questões')
+                .setValue('other')
+                .setEmoji('🎫')
+        ]);
+
+    const row = new ActionRowBuilder().addComponents(selectMenu);
+
+    await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+}
+
+// Função para processar categoria do ticket
+async function handleTicketCategory(interaction) {
+    const category = interaction.values[0];
+    
+    await interaction.deferReply({ ephemeral: true });
+    
+    try {
+        const result = await client.ticketSystem.createTicket(interaction, category, 'Criado via painel');
+        
+        if (result.success) {
+            const embed = new EmbedBuilder()
+                .setColor('#00ff88')
+                .setTitle('✅ Ticket Criado!')
+                .setDescription(`Seu ticket foi criado com sucesso!`)
+                .addFields(
+                    { name: '📺 Canal', value: result.channel.toString(), inline: true },
+                    { name: '🆔 Número', value: `#${result.ticketNumber}`, inline: true },
+                    { name: '📝 Categoria', value: category, inline: true },
+                    { name: '👥 Equipe', value: 'Aguarde um administrador responder', inline: false }
+                )
+                .setTimestamp();
+
+            await interaction.editReply({ embeds: [embed] });
+        } else {
+            await interaction.editReply({ content: result.message });
+        }
+    } catch (error) {
+        console.error('❌ Erro ao criar ticket via painel:', error);
+        await interaction.editReply({ content: '❌ Ocorreu um erro ao criar o ticket!' });
     }
 }
 

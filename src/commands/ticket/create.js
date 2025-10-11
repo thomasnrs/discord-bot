@@ -9,14 +9,14 @@ module.exports = {
                 .setDescription('Categoria do ticket')
                 .setRequired(true)
                 .addChoices(
-                    { name: '🐛 Bug Report', value: 'Bug Report' },
-                    { name: '💡 Sugestão', value: 'Sugestão' },
-                    { name: '❓ Dúvida', value: 'Dúvida' },
-                    { name: '⚠️ Denúncia', value: 'Denúncia' },
-                    { name: '🔧 Suporte Técnico', value: 'Suporte Técnico' },
-                    { name: '💰 Problema de Pagamento', value: 'Problema de Pagamento' },
-                    { name: '🎵 Problema com Música', value: 'Problema com Música' },
-                    { name: '🎮 Outro', value: 'Outro' }
+                    { name: '🐛 Bug Report', value: 'bug' },
+                    { name: '💡 Sugestão', value: 'suggestion' },
+                    { name: '❓ Dúvida', value: 'question' },
+                    { name: '🚨 Denúncia', value: 'report' },
+                    { name: '🔧 Suporte', value: 'support' },
+                    { name: '💰 Economia', value: 'economy' },
+                    { name: '🎵 Música', value: 'music' },
+                    { name: '🎫 Outros', value: 'other' }
                 ))
         .addStringOption(option =>
             option.setName('motivo')
@@ -35,12 +35,14 @@ module.exports = {
         if (result.success) {
             const embed = new EmbedBuilder()
                 .setColor('#00ff88')
-                .setTitle('✅ Ticket Criado')
+                .setTitle('✅ Ticket Criado!')
                 .setDescription(`Seu ticket foi criado com sucesso!`)
                 .addFields(
-                    { name: '🎫 Canal', value: result.channel.toString(), inline: true },
+                    { name: '📺 Canal', value: result.channel.toString(), inline: true },
+                    { name: '🆔 Número', value: `#${result.ticketNumber}`, inline: true },
                     { name: '📝 Categoria', value: category, inline: true },
-                    { name: '📄 Motivo', value: reason, inline: false }
+                    { name: '📄 Motivo', value: reason, inline: false },
+                    { name: '👥 Equipe', value: 'Aguarde um administrador responder', inline: false }
                 )
                 .setTimestamp();
 
