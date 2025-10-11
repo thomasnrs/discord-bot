@@ -8,6 +8,7 @@ const MusicSystem = require('./modules/music');
 const TicketSystem = require('./modules/ticketSystem');
 const LevelSystem = require('./modules/levelSystem');
 const NewsSystem = require('./modules/newsSystem');
+const VerificationSystem = require('./modules/verificationSystem');
 const WebDashboard = require('./web/dashboard');
 require('dotenv').config();
 
@@ -33,6 +34,7 @@ client.musicSystem = new MusicSystem(client);
 client.ticketSystem = new TicketSystem();
 client.levelSystem = new LevelSystem();
 client.newsSystem = new NewsSystem();
+client.verificationSystem = new VerificationSystem();
 
 // Carregar comandos (incluindo subpastas)
 function loadCommands(dir) {
@@ -281,11 +283,24 @@ client.once(Events.ClientReady, async readyClient => {
     
     // Iniciar sistema de notícias
     client.newsSystem.init(client);
+    
+    // Iniciar sistema de verificação
+    client.verificationSystem.init(client);
 });
 
 // Evento: Interação de comando
 client.on(Events.InteractionCreate, async interaction => {
-    if (!interaction.isChatInputCommand()) return;
+    if (interaction.isChatInputCommand()) {
+        // Processar comandos slash
+        await handleSlashCommand(interaction);
+    } else if (interaction.isButton()) {
+        // Processar cliques em botões
+        await handleButtonClick(interaction);
+    }
+});
+
+// Função para processar comandos slash
+async function handleSlashCommand(interaction) {
 
     const command = client.commands.get(interaction.commandName);
 
@@ -299,16 +314,16 @@ client.on(Events.InteractionCreate, async interaction => {
         client.systemStats.incrementCommandCount();
         
         // Sistema de níveis para comandos
-        const levelResult = client.levelSystem.addCommandXp(interaction.user.id, client.database);
+        if (process.env.LEVEL_SYSTEM_ENABLED === 'true') {
+            const levelResult = client.levelSystem.addCommandXp(interaction.user.id, client.database);
+            if (levelResult.leveledUp) {
+                const embed = client.levelSystem.createLevelUpEmbed(interaction.user, levelResult.newLevel, levelResult.oldLevel);
+                await interaction.followUp({ embeds: [embed], ephemeral: true });
+            }
+        }
         
         await command.execute(interaction);
         console.log(`✅ Comando ${interaction.commandName} executado por ${interaction.user.tag}`);
-        
-        // Notificar level up se necessário
-        if (levelResult.leveledUp) {
-            const embed = client.levelSystem.createLevelUpEmbed(interaction.user, levelResult.newLevel, levelResult.oldLevel);
-            await interaction.followUp({ embeds: [embed], ephemeral: true });
-        }
     } catch (error) {
         console.error(`❌ Erro ao executar comando ${interaction.commandName}:`, error);
         
@@ -323,7 +338,34 @@ client.on(Events.InteractionCreate, async interaction => {
             await interaction.reply(errorMessage);
         }
     }
-});
+}
+
+// Função para processar cliques em botões
+async function handleButtonClick(interaction) {
+    try {
+        // Sistema de verificação
+        if (interaction.customId === 'verify_button') {
+            await client.verificationSystem.handleButtonClick(interaction);
+            return;
+        }
+        
+        // Outros botões podem ser adicionados aqui
+        
+    } catch (error) {
+        console.error('❌ Erro ao processar clique em botão:', error);
+        
+        const errorMessage = {
+            content: '❌ Ocorreu um erro ao processar sua interação!',
+            ephemeral: true
+        };
+
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp(errorMessage);
+        } else {
+            await interaction.reply(errorMessage);
+        }
+    }
+}
 
 // Evento: Mensagem recebida (para contador e sistema de níveis)
 client.on(Events.MessageCreate, async message => {
