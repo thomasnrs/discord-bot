@@ -15,7 +15,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('status')
-                .setDescription('Mostra o status do sistema de stats automático')),
+                .setDescription('Mostra o status do sistema de stats automático'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('cleanup')
+                .setDescription('Limpa mensagens antigas de stats do canal')),
 
     async execute(interaction) {
         // Verificar se o usuário tem permissão de administrador
@@ -92,6 +96,63 @@ module.exports = {
 
                     await interaction.reply({ embeds: [statusEmbed] });
                     break;
+
+                case 'cleanup':
+                    try {
+                        const channel = interaction.client.channels.cache.get('1426577469284024420');
+                        if (!channel) {
+                            return await interaction.reply({
+                                content: '❌ Canal de stats não encontrado!',
+                                ephemeral: true
+                            });
+                        }
+
+                        // Buscar mensagens antigas de stats
+                        const messages = await channel.messages.fetch({ limit: 100 });
+                        const statsMessages = messages.filter(msg => 
+                            msg.author.id === interaction.client.user.id && 
+                            msg.embeds.length > 0 && 
+                            msg.embeds[0].title && 
+                            msg.embeds[0].title.includes('Estatísticas do Bot')
+                        );
+
+                        if (statsMessages.size <= 1) {
+                            return await interaction.reply({
+                                content: 'ℹ️ Não há mensagens antigas de stats para limpar.',
+                                ephemeral: true
+                            });
+                        }
+
+                        // Manter apenas a mensagem mais recente
+                        const messagesToDelete = statsMessages.array().slice(1);
+                        let deletedCount = 0;
+
+                        for (const msg of messagesToDelete) {
+                            try {
+                                await msg.delete();
+                                deletedCount++;
+                            } catch (error) {
+                                console.log('⚠️ Erro ao deletar mensagem:', error.message);
+                            }
+                        }
+
+                        const cleanupEmbed = new EmbedBuilder()
+                            .setColor('#00ff88')
+                            .setTitle('🗑️ Limpeza Concluída')
+                            .setDescription(`Foram removidas ${deletedCount} mensagens antigas de stats.`)
+                            .setTimestamp();
+
+                        await interaction.reply({ embeds: [cleanupEmbed] });
+                        break;
+
+                    } catch (error) {
+                        console.error('❌ Erro no comando cleanup:', error);
+                        await interaction.reply({
+                            content: '❌ Erro ao limpar mensagens antigas.',
+                            ephemeral: true
+                        });
+                        break;
+                    }
             }
 
             // Incrementar contador de comandos

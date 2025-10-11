@@ -1,5 +1,6 @@
 const os = require('os');
 const { EmbedBuilder } = require('discord.js');
+const fs = require('fs');
 
 class SystemStats {
     constructor() {
@@ -42,11 +43,40 @@ class SystemStats {
         const cpus = os.cpus();
         const cpuModel = cpus[0].model;
         const cpuCores = cpus.length;
+        
+        // Calcular load average (se disponível)
+        const loadAvg = os.loadavg();
+        const cpuLoad = loadAvg[0] ? `${loadAvg[0].toFixed(2)}` : 'N/A';
 
         // Informações de plataforma
         const platform = os.platform();
         const arch = os.arch();
         const nodeVersion = process.version;
+        
+        // Informações de processo
+        const processUptime = process.uptime();
+        const processMemory = process.memoryUsage();
+        
+        // Informações de rede (interfaces)
+        const networkInterfaces = os.networkInterfaces();
+        let networkInfo = 'N/A';
+        if (networkInterfaces) {
+            const interfaces = Object.keys(networkInterfaces);
+            networkInfo = interfaces.length > 0 ? interfaces[0] : 'N/A';
+        }
+        
+        // Informações de usuário do sistema
+        const systemUser = os.userInfo();
+        const hostname = os.hostname();
+        
+        // Informações de disco (aproximação)
+        let diskInfo = 'N/A';
+        try {
+            const stats = fs.statSync('/');
+            diskInfo = 'Disponível';
+        } catch (error) {
+            diskInfo = 'Indisponível';
+        }
 
         return {
             uptime: formatUptime(),
@@ -55,16 +85,25 @@ class SystemStats {
                 total: this.formatBytes(totalMem),
                 used: this.formatBytes(usedMem),
                 free: this.formatBytes(freeMem),
-                usagePercent: memUsagePercent
+                usagePercent: memUsagePercent,
+                process: this.formatBytes(processMemory.heapUsed)
             },
             cpu: {
                 model: cpuModel,
                 cores: cpuCores,
                 platform: platform,
-                arch: arch
+                arch: arch,
+                load: cpuLoad
             },
             node: {
-                version: nodeVersion
+                version: nodeVersion,
+                uptime: Math.floor(processUptime)
+            },
+            system: {
+                hostname: hostname,
+                user: systemUser.username,
+                network: networkInfo,
+                disk: diskInfo
             },
             bot: {
                 commands: this.commandCount,
@@ -102,29 +141,39 @@ class SystemStats {
                     inline: true
                 },
                 {
-                    name: '💾 Memória',
+                    name: '💾 Memória Sistema',
                     value: `\`${stats.memory.used}/${stats.memory.total}\`\n\`${stats.memory.usagePercent}% usado\``,
                     inline: true
                 },
                 {
+                    name: '🧠 Memória Processo',
+                    value: `\`${stats.memory.process} heap\``,
+                    inline: true
+                },
+                {
                     name: '🖥️ CPU',
-                    value: `\`${stats.cpu.cores} cores\`\n\`${stats.cpu.platform} ${stats.cpu.arch}\``,
+                    value: `\`${stats.cpu.cores} cores\`\n\`Load: ${stats.cpu.load}\``,
                     inline: true
                 },
                 {
-                    name: '📈 Comandos',
-                    value: `\`${stats.bot.commands} executados\``,
+                    name: '📈 Atividade',
+                    value: `\`${stats.bot.commands} comandos\`\n\`${stats.bot.messages} mensagens\``,
                     inline: true
                 },
                 {
-                    name: '💬 Mensagens',
-                    value: `\`${stats.bot.messages} processadas\``,
+                    name: '🖥️ Sistema',
+                    value: `\`${stats.system.hostname}\`\n\`${stats.system.user}@${stats.cpu.platform}\``,
                     inline: true
                 },
                 {
-                    name: '⚙️ Sistema',
-                    value: `\`Node.js ${stats.node.version}\`\n\`${stats.cpu.model}\``,
-                    inline: false
+                    name: '🌐 Rede',
+                    value: `\`${stats.system.network}\`\n\`${stats.system.disk}\``,
+                    inline: true
+                },
+                {
+                    name: '⚙️ Runtime',
+                    value: `\`Node.js ${stats.node.version}\`\n\`Uptime: ${stats.node.uptime}s\``,
+                    inline: true
                 }
             );
 

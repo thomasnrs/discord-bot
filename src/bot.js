@@ -139,11 +139,31 @@ function startAutoStats() {
             }
             
             // Calcular ping
-            const startTime = Date.now();
             const ping = client.ws.ping;
             
             // Criar embed de stats
             const statsEmbed = client.systemStats.createStatsEmbed(ping);
+            
+            // Tentar encontrar a última mensagem de stats do bot
+            if (!client.lastStatsMessage) {
+                try {
+                    // Buscar a última mensagem do bot no canal
+                    const messages = await channel.messages.fetch({ limit: 50 });
+                    const botMessages = messages.filter(msg => 
+                        msg.author.id === client.user.id && 
+                        msg.embeds.length > 0 && 
+                        msg.embeds[0].title && 
+                        msg.embeds[0].title.includes('Estatísticas do Bot')
+                    );
+                    
+                    if (botMessages.size > 0) {
+                        client.lastStatsMessage = botMessages.first();
+                        console.log('📊 Mensagem de stats anterior encontrada, reutilizando...');
+                    }
+                } catch (error) {
+                    console.log('⚠️ Erro ao buscar mensagem anterior:', error.message);
+                }
+            }
             
             // Enviar ou editar mensagem
             if (client.lastStatsMessage) {
@@ -164,11 +184,46 @@ function startAutoStats() {
         }
     }
     
+    // Função para limpar mensagens antigas de stats (opcional)
+    async function cleanupOldStats() {
+        try {
+            const channel = client.channels.cache.get(STATS_CHANNEL_ID);
+            if (!channel) return;
+            
+            // Buscar mensagens antigas de stats
+            const messages = await channel.messages.fetch({ limit: 100 });
+            const statsMessages = messages.filter(msg => 
+                msg.author.id === client.user.id && 
+                msg.embeds.length > 0 && 
+                msg.embeds[0].title && 
+                msg.embeds[0].title.includes('Estatísticas do Bot')
+            );
+            
+            // Manter apenas as 3 mensagens mais recentes
+            if (statsMessages.size > 3) {
+                const messagesToDelete = statsMessages.array().slice(3);
+                for (const msg of messagesToDelete) {
+                    try {
+                        await msg.delete();
+                        console.log('🗑️ Mensagem antiga de stats removida');
+                    } catch (error) {
+                        console.log('⚠️ Erro ao deletar mensagem antiga:', error.message);
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('⚠️ Erro na limpeza de mensagens antigas:', error.message);
+        }
+    }
+    
     // Enviar stats imediatamente
     setTimeout(sendStats, 5000); // Aguardar 5 segundos após o bot ficar online
     
     // Configurar intervalo para envio automático
     client.statsInterval = setInterval(sendStats, UPDATE_INTERVAL);
+    
+    // Limpar mensagens antigas a cada 10 minutos
+    client.cleanupInterval = setInterval(cleanupOldStats, 600000);
     
     console.log('✅ Sistema de stats automático iniciado!');
 }
