@@ -68,3 +68,11 @@ services:
         value: "true"
       - key: FUN_COMMANDS_ENABLED
         value: "true"
+      - key: NEWS_SYSTEM_ENABLED
+        value: "true"
+      - key: NEWS_CHANNEL_ID
+        value: "1426596564377403442"
+      - key: NEWS_UPDATE_INTERVAL
+        value: "15"
+      - key: NEWS_MAX_POSTS_PER_UPDATE
+        value: "3"

@@ -7,6 +7,7 @@ const Economy = require('./modules/economy');
 const MusicSystem = require('./modules/music');
 const TicketSystem = require('./modules/ticketSystem');
 const LevelSystem = require('./modules/levelSystem');
+const NewsSystem = require('./modules/newsSystem');
 const WebDashboard = require('./web/dashboard');
 require('dotenv').config();
 
@@ -31,6 +32,7 @@ client.economy = new Economy();
 client.musicSystem = new MusicSystem(client);
 client.ticketSystem = new TicketSystem();
 client.levelSystem = new LevelSystem();
+client.newsSystem = new NewsSystem();
 
 // Carregar comandos (incluindo subpastas)
 function loadCommands(dir) {
@@ -276,6 +278,9 @@ client.once(Events.ClientReady, async readyClient => {
     // Iniciar dashboard web
     const dashboard = new WebDashboard(client);
     dashboard.start();
+    
+    // Iniciar sistema de notícias
+    client.newsSystem.init(client);
 });
 
 // Evento: Interação de comando
