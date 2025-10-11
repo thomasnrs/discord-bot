@@ -32,13 +32,39 @@ services:
         fromService:
           type: secret
           name: log-channel-id
+      - key: STATS_CHANNEL_ID
+        value: "1426577469284024420"
       - key: MAX_REQUESTS_PER_USER
         value: "5"
       - key: RATE_LIMIT_WINDOW
         value: "60000"
       - key: DEFAULT_MODEL
-        value: "@cf/lykon/dreamshaper-8-lcm"
+        value: "@cf/stabilityai/stable-diffusion-xl-base-1.0"
       - key: DEFAULT_STEPS
         value: "20"
       - key: MAX_STEPS
         value: "50"
+      - key: ECONOMY_ENABLED
+        value: "true"
+      - key: DAILY_AMOUNT
+        value: "500"
+      - key: WEEKLY_AMOUNT
+        value: "2000"
+      - key: LEVEL_SYSTEM_ENABLED
+        value: "true"
+      - key: XP_PER_MESSAGE
+        value: "15"
+      - key: XP_PER_COMMAND
+        value: "25"
+      - key: MUSIC_ENABLED
+        value: "true"
+      - key: TICKET_SYSTEM_ENABLED
+        value: "true"
+      - key: WEB_DASHBOARD_ENABLED
+        value: "true"
+      - key: WEB_PORT
+        value: "3000"
+      - key: MODERATION_ENABLED
+        value: "true"
+      - key: FUN_COMMANDS_ENABLED
+        value: "true"

@@ -4,6 +4,10 @@ const path = require('path');
 const SystemStats = require('./modules/systemStats');
 const Database = require('./modules/database');
 const Economy = require('./modules/economy');
+const MusicSystem = require('./modules/music');
+const TicketSystem = require('./modules/ticketSystem');
+const LevelSystem = require('./modules/levelSystem');
+const WebDashboard = require('./web/dashboard');
 require('dotenv').config();
 
 // Criar cliente Discord
@@ -24,6 +28,9 @@ client.commands = new Collection();
 client.systemStats = new SystemStats();
 client.database = new Database();
 client.economy = new Economy();
+client.musicSystem = new MusicSystem(client);
+client.ticketSystem = new TicketSystem();
+client.levelSystem = new LevelSystem();
 
 // Carregar comandos (incluindo subpastas)
 function loadCommands(dir) {
@@ -265,6 +272,10 @@ client.once(Events.ClientReady, async readyClient => {
     
     // Iniciar sistema de stats automático
     startAutoStats();
+    
+    // Iniciar dashboard web
+    const dashboard = new WebDashboard(client);
+    dashboard.start();
 });
 
 // Evento: Interação de comando
@@ -282,8 +293,17 @@ client.on(Events.InteractionCreate, async interaction => {
         // Incrementar contador de comandos
         client.systemStats.incrementCommandCount();
         
+        // Sistema de níveis para comandos
+        const levelResult = client.levelSystem.addCommandXp(interaction.user.id, client.database);
+        
         await command.execute(interaction);
         console.log(`✅ Comando ${interaction.commandName} executado por ${interaction.user.tag}`);
+        
+        // Notificar level up se necessário
+        if (levelResult.leveledUp) {
+            const embed = client.levelSystem.createLevelUpEmbed(interaction.user, levelResult.newLevel, levelResult.oldLevel);
+            await interaction.followUp({ embeds: [embed], ephemeral: true });
+        }
     } catch (error) {
         console.error(`❌ Erro ao executar comando ${interaction.commandName}:`, error);
         
@@ -300,11 +320,19 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
-// Evento: Mensagem recebida (para contador)
-client.on(Events.MessageCreate, message => {
+// Evento: Mensagem recebida (para contador e sistema de níveis)
+client.on(Events.MessageCreate, async message => {
     // Incrementar contador de mensagens (apenas se não for do bot)
     if (!message.author.bot) {
         client.systemStats.incrementMessageCount();
+        
+        // Sistema de níveis
+        const levelResult = client.levelSystem.addMessageXp(message.author.id, client.database);
+        
+        if (levelResult.leveledUp) {
+            const embed = client.levelSystem.createLevelUpEmbed(message.author, levelResult.newLevel, levelResult.oldLevel);
+            await message.channel.send({ embeds: [embed] });
+        }
     }
 });
 
