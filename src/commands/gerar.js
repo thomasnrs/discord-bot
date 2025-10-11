@@ -57,7 +57,6 @@ module.exports = {
                         { name: '⚙️ Steps', value: result.steps.toString(), inline: true },
                         { name: '👤 Usuário', value: interaction.user.toString(), inline: true }
                     )
-                    .setImage(`attachment://${filename}`)
                     .setTimestamp()
                     .setFooter({ 
                         text: `Gerado por ${interaction.user.username}`, 
