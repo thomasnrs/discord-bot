@@ -9,6 +9,7 @@ const TicketSystem = require('./modules/ticketSystem');
 const LevelSystem = require('./modules/levelSystem');
 const NewsSystem = require('./modules/newsSystem');
 const VerificationSystem = require('./modules/verificationSystem');
+const CentralizedLogs = require('./modules/centralizedLogs');
 const WebDashboard = require('./web/dashboard');
 require('dotenv').config();
 
@@ -35,6 +36,7 @@ client.ticketSystem = new TicketSystem();
 client.levelSystem = new LevelSystem();
 client.newsSystem = new NewsSystem();
 client.verificationSystem = new VerificationSystem();
+client.centralizedLogs = new CentralizedLogs();
 
 // Carregar comandos (incluindo subpastas)
 function loadCommands(dir) {
@@ -286,6 +288,9 @@ client.once(Events.ClientReady, async readyClient => {
     
     // Iniciar sistema de verificação
     client.verificationSystem.init(client);
+    
+    // Iniciar sistema de logs centralizado
+    client.centralizedLogs.init(client);
 });
 
 // Evento: Interação de comando
@@ -322,6 +327,9 @@ async function handleSlashCommand(interaction) {
             if (levelResult.leveledUp) {
                 const embed = client.levelSystem.createLevelUpEmbed(interaction.user, levelResult.newLevel, levelResult.oldLevel);
                 await interaction.followUp({ embeds: [embed], ephemeral: true });
+                
+                // Log centralizado
+                client.centralizedLogs.logLevel('level_up', interaction.user, levelResult.oldLevel, levelResult.newLevel);
             }
         }
         
@@ -515,11 +523,16 @@ client.on(Events.MessageCreate, async message => {
         client.systemStats.incrementMessageCount();
         
         // Sistema de níveis
-        const levelResult = client.levelSystem.addMessageXp(message.author.id, client.database);
-        
-        if (levelResult.leveledUp) {
-            const embed = client.levelSystem.createLevelUpEmbed(message.author, levelResult.newLevel, levelResult.oldLevel);
-            await message.channel.send({ embeds: [embed] });
+        if (process.env.LEVEL_SYSTEM_ENABLED === 'true') {
+            const levelResult = client.levelSystem.addMessageXp(message.author.id, client.database);
+            
+            if (levelResult.leveledUp) {
+                const embed = client.levelSystem.createLevelUpEmbed(message.author, levelResult.newLevel, levelResult.oldLevel);
+                await message.channel.send({ embeds: [embed] });
+                
+                // Log centralizado
+                client.centralizedLogs.logLevel('level_up', message.author, levelResult.oldLevel, levelResult.newLevel);
+            }
         }
     }
 });

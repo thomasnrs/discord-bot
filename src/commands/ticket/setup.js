@@ -14,6 +14,12 @@ module.exports = {
         try {
             // Recriar painel de tickets
             await ticketSystem.createTicketPanel();
+            
+            // Se não foi criado automaticamente, criar no canal atual
+            if (!ticketSystem.ticketPanelChannelId) {
+                await ticketSystem.sendTicketPanel(interaction.channel);
+                ticketSystem.ticketPanelChannelId = interaction.channel.id;
+            }
 
             const stats = ticketSystem.getStats();
             

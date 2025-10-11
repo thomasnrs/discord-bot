@@ -5,6 +5,7 @@ class TicketSystem {
         this.ticketCategoryId = '1426614509069533306'; // Categoria específica para tickets
         this.ticketPanelChannelId = null; // Será definido quando criar o canal
         this.adminRoleId = '1404206347041505461'; // Cargo de admin
+        this.logsChannelId = '1426433248556355666'; // Canal de logs centralizado
         this.autoCloseTime = parseInt(process.env.TICKET_AUTO_CLOSE_TIME) || 600000; // 10 minutos
         this.tickets = new Map(); // Armazenar informações dos tickets
         this.ticketCounter = 0; // Contador de tickets
@@ -16,8 +17,10 @@ class TicketSystem {
         this.client = client;
         console.log('🎫 Sistema de tickets inicializado');
         
-        // Criar canal de painel se não existir
-        this.createTicketPanel();
+        // Aguardar um pouco para o bot estar totalmente pronto
+        setTimeout(() => {
+            this.createTicketPanel();
+        }, 5000); // 5 segundos após inicialização
     }
 
     // Criar canal de painel de tickets
@@ -653,6 +656,66 @@ Aqui você pode criar um ticket para receber suporte da nossa equipe.
                 timestamp: Date.now()
             });
         }
+        
+        // Enviar log para canal centralizado
+        this.sendLogToChannel(action, userId, description, ticket);
+    }
+
+    // Enviar log para canal centralizado
+    async sendLogToChannel(action, userId, description, ticket = null) {
+        try {
+            const channel = this.client.channels.cache.get(this.logsChannelId);
+            if (!channel) {
+                console.log('❌ Canal de logs não encontrado!');
+                return;
+            }
+
+            const user = this.client.users.cache.get(userId);
+            const userName = user ? user.tag : 'Usuário desconhecido';
+
+            const embed = new EmbedBuilder()
+                .setColor(this.getLogColor(action))
+                .setTitle(`🎫 Log de Ticket - ${this.getActionName(action)}`)
+                .setDescription(description)
+                .addFields(
+                    { name: '👤 Usuário', value: userName, inline: true },
+                    { name: '⏰ Timestamp', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: true },
+                    { name: '🆔 Ticket', value: ticket ? `#${ticket.ticketNumber}` : 'N/A', inline: true }
+                )
+                .setTimestamp()
+                .setFooter({ text: 'Nebula Friends • Sistema de Logs' });
+
+            await channel.send({ embeds: [embed] });
+
+        } catch (error) {
+            console.error('❌ Erro ao enviar log:', error);
+        }
+    }
+
+    // Obter cor do log baseado na ação
+    getLogColor(action) {
+        const colors = {
+            'created': '#00ff88',
+            'paused': '#ff8800',
+            'resumed': '#00ff88',
+            'closed': '#ff4444',
+            'user_added': '#0099ff',
+            'user_removed': '#ff4444'
+        };
+        return colors[action] || '#7289da';
+    }
+
+    // Obter nome da ação
+    getActionName(action) {
+        const names = {
+            'created': 'Ticket Criado',
+            'paused': 'Ticket Pausado',
+            'resumed': 'Ticket Retomado',
+            'closed': 'Ticket Fechado',
+            'user_added': 'Usuário Adicionado',
+            'user_removed': 'Usuário Removido'
+        };
+        return names[action] || 'Ação Desconhecida';
     }
 
     // Adicionar usuário ao ticket
