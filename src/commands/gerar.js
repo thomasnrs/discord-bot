@@ -68,7 +68,7 @@ module.exports = {
                     files: [attachment] 
                 });
 
-                // Log de sucesso
+                // Log de sucesso - versão corrigida
                 console.log(`✅ Imagem gerada para ${interaction.user.tag}: ${prompt.substring(0, 50)}...`);
 
             } else {
