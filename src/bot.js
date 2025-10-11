@@ -55,12 +55,18 @@ if (fs.existsSync(modulesPath)) {
 async function deployCommands() {
     try {
         console.log('🔄 Iniciando deploy automático dos comandos...');
+        console.log('🔍 Verificando variáveis de ambiente...');
+        console.log('DISCORD_TOKEN:', process.env.DISCORD_TOKEN ? '✅ Configurado' : '❌ Não configurado');
+        console.log('CLIENT_ID:', process.env.CLIENT_ID ? '✅ Configurado' : '❌ Não configurado');
+        console.log('GUILD_ID:', process.env.GUILD_ID ? '✅ Configurado' : '❌ Não configurado');
         
         const commands = [];
         const commandsPath = path.join(__dirname, 'commands');
+        console.log('📁 Caminho dos comandos:', commandsPath);
         
         if (fs.existsSync(commandsPath)) {
             const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+            console.log('📄 Arquivos de comando encontrados:', commandFiles);
             
             for (const file of commandFiles) {
                 const filePath = path.join(commandsPath, file);
@@ -68,22 +74,34 @@ async function deployCommands() {
                 
                 if ('data' in command && 'execute' in command) {
                     commands.push(command.data.toJSON());
+                    console.log(`✅ Comando preparado: ${command.data.name}`);
                 }
             }
+        } else {
+            console.log('❌ Pasta de comandos não encontrada!');
+        }
+        
+        console.log(`📊 Total de comandos preparados: ${commands.length}`);
+        
+        if (commands.length === 0) {
+            console.log('❌ Nenhum comando encontrado para deploy!');
+            return;
         }
         
         const rest = new REST().setToken(process.env.DISCORD_TOKEN);
         
         // Deploy global
+        console.log('🌐 Fazendo deploy global...');
         await rest.put(
             Routes.applicationCommands(process.env.CLIENT_ID),
             { body: commands }
         );
         
-        console.log(`✅ Deploy automático concluído! ${commands.length} comandos registrados.`);
+        console.log(`✅ Deploy global concluído! ${commands.length} comandos registrados.`);
         
         // Deploy no servidor específico (mais rápido)
         if (process.env.GUILD_ID) {
+            console.log('🏠 Fazendo deploy no servidor específico...');
             await rest.put(
                 Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
                 { body: commands }
@@ -93,6 +111,7 @@ async function deployCommands() {
         
     } catch (error) {
         console.error('❌ Erro no deploy automático:', error);
+        console.error('Stack trace:', error.stack);
     }
 }
 
