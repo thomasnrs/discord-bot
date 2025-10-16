@@ -12,6 +12,11 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true });
 
         try {
+            // Garantir que o client está definido
+            if (!ticketSystem.client) {
+                ticketSystem.client = interaction.client;
+            }
+            
             // Enviar painel no canal atual
             await ticketSystem.sendTicketPanel(interaction.channel);
             

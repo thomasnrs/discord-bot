@@ -33,10 +33,16 @@ client.database = new Database();
 client.economy = new Economy();
 client.musicSystem = new MusicSystem(client);
 client.ticketSystem = new TicketSystem();
+client.ticketSystem.client = client;
 client.levelSystem = new LevelSystem();
 client.newsSystem = new NewsSystem();
 client.verificationSystem = new VerificationSystem();
 client.centralizedLogs = new CentralizedLogs();
+
+// Definir client para todos os sistemas
+client.newsSystem.client = client;
+client.verificationSystem.client = client;
+client.centralizedLogs.client = client;
 
 // Carregar comandos (incluindo subpastas)
 function loadCommands(dir) {

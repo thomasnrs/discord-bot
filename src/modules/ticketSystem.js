@@ -26,6 +26,11 @@ class TicketSystem {
     // Criar canal de painel de tickets
     async createTicketPanel() {
         try {
+            if (!this.client) {
+                console.log('❌ Client não inicializado no sistema de tickets');
+                return;
+            }
+            
             const guild = this.client.guilds.cache.get(process.env.GUILD_ID);
             if (!guild) {
                 console.log('❌ Servidor não encontrado para criar painel de tickets');
@@ -139,7 +144,7 @@ Aqui você pode criar um ticket para receber suporte da nossa equipe.
             .setThumbnail('https://cdn.discordapp.com/emojis/1234567890123456789.png')
             .setFooter({ 
                 text: 'Nebula Friends • Sistema de Tickets',
-                iconURL: this.client.user?.displayAvatarURL()
+                iconURL: this.client?.user?.displayAvatarURL() || undefined
             })
             .setTimestamp();
     }
@@ -365,7 +370,7 @@ Aqui você pode criar um ticket para receber suporte da nossa equipe.
             .setThumbnail(user.displayAvatarURL())
             .setFooter({ 
                 text: 'Nebula Friends • Sistema de Tickets',
-                iconURL: this.client.user?.displayAvatarURL()
+                iconURL: this.client?.user?.displayAvatarURL() || undefined
             })
             .setTimestamp();
     }
