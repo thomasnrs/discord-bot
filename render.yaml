@@ -86,3 +86,43 @@ services:
         value: "1404205659922235474"
       - key: VERIFICATION_CHANNEL_ID
         value: "1404204595298963546"
+      - key: API_KEY
+        fromService:
+          type: secret
+          name: api-key
+      - key: BOT_PREFIX
+        value: "<>"
+      - key: STATS_UPDATE_INTERVAL
+        value: "30000"
+      - key: WORK_COOLDOWN
+        value: "1800000"
+      - key: CRIME_COOLDOWN
+        value: "3600000"
+      - key: XP_PER_VOICE_MINUTE
+        value: "5"
+      - key: BASE_XP_REQUIRED
+        value: "100"
+      - key: XP_MULTIPLIER
+        value: "1.5"
+      - key: MUSIC_CHANNEL_ID
+        value: "1426577469284024420"
+      - key: MAX_QUEUE_SIZE
+        value: "50"
+      - key: DEFAULT_VOLUME
+        value: "50"
+      - key: TICKET_CATEGORY_ID
+        value: "1426614509069533306"
+      - key: TICKET_AUTO_CLOSE_TIME
+        value: "600000"
+      - key: WEB_HOST
+        value: "0.0.0.0"
+      - key: MUTE_ROLE_ID
+        value: "auto"
+      - key: WARN_LIMIT
+        value: "3"
+      - key: AUTO_MODERATION
+        value: "true"
+      - key: JOKE_API_URL
+        value: "https://api.chucknorris.io/jokes/random"
+      - key: NEWS_KEYWORDS
+        value: "data breach,vazamento,cybersecurity,cibersegurança,hack,vulnerability,malware,ransomware,discord,security"
