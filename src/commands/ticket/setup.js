@@ -9,7 +9,7 @@ module.exports = {
     async execute(interaction) {
         const ticketSystem = interaction.client.ticketSystem;
         
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: 64 }); // MessageFlags.Ephemeral
 
         try {
             // Garantir que o client está definido
@@ -33,10 +33,10 @@ module.exports = {
                 .setTitle('✅ Sistema de Tickets Configurado')
                 .setDescription('O sistema de tickets foi configurado com sucesso!')
                 .addFields(
-                    { name: '📁 Categoria', value: `<#${stats.categoryId}>`, inline: true },
-                    { name: '📋 Painel', value: stats.panelChannelId ? `<#${stats.panelChannelId}>` : 'Não criado', inline: true },
-                    { name: '👥 Admin Role', value: `<@&${stats.adminRoleId}>`, inline: true },
-                    { name: '📊 Estatísticas', value: `**Total:** ${stats.total}\n**Abertos:** ${stats.open}\n**Pausados:** ${stats.paused}\n**Fechados:** ${stats.closed}`, inline: false }
+                    { name: '📁 Categoria', value: `<#${ticketSystem.ticketCategoryId}>`, inline: true },
+                    { name: '📋 Painel', value: ticketSystem.ticketPanelChannelId ? `<#${ticketSystem.ticketPanelChannelId}>` : 'Não criado', inline: true },
+                    { name: '👥 Admin Role', value: `<@&${ticketSystem.adminRoleId}>`, inline: true },
+                    { name: '📊 Estatísticas', value: `**Total:** ${stats.totalTickets}\n**Abertos:** ${stats.openTickets}\n**Pausados:** ${stats.pausedTickets}`, inline: false }
                 )
                 .setTimestamp()
                 .setFooter({ text: 'Nebula Friends • Sistema de Tickets' });

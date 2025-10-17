@@ -18,9 +18,13 @@ class TicketSystem {
         console.log('🎫 Sistema de tickets inicializado');
         
         // Aguardar um pouco para o bot estar totalmente pronto
-        setTimeout(() => {
-            this.createTicketPanel();
-        }, 5000); // 5 segundos após inicialização
+        setTimeout(async () => {
+            try {
+                await this.createTicketPanel();
+            } catch (error) {
+                console.error('❌ Erro ao criar painel de tickets automaticamente:', error);
+            }
+        }, 10000); // 10 segundos após inicialização
     }
 
     // Criar canal de painel de tickets

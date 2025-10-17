@@ -28,7 +28,7 @@ module.exports = {
         const reason = interaction.options.getString('motivo') || 'Sem motivo especificado';
         const ticketSystem = interaction.client.ticketSystem;
         
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: 64 }); // MessageFlags.Ephemeral
 
         const result = await ticketSystem.createTicket(interaction, category, reason);
         
